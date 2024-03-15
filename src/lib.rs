@@ -1,6 +1,7 @@
 pub mod app;
 pub mod calendar;
 pub mod error_template;
+
 #[cfg(feature = "ssr")]
 pub mod fileserv;
 

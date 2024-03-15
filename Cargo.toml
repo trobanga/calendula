@@ -8,12 +8,13 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 axum = { version = "0.7", optional = true, features = ["macros"] }
+cfg-if = "1.0.0"
 chrono = { version = "0.4.35", features = ["serde"] }
 console_error_panic_hook = "0.1"
 futures = "0.3.30"
 getset = "0.1.2"
 http = "1"
-leptonic = { version = "0.5.0" }
+leptonic = { git = "ssh://git@github.com/lpotthast/leptonic.git", features = ["nightly"] }
 leptos = { version = "0.6", features = ["nightly"] }
 leptos_axum = { version = "0.6", optional = true }
 leptos_meta = { version = "0.6", features = ["nightly"] }
@@ -21,6 +22,12 @@ leptos_router = { version = "0.6", features = ["nightly"] }
 serde = { version = "1.0.197", features = ["derive"] }
 sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "sqlite", "chrono"], optional = true }
 thiserror = "1"
+time = { version = "0.3.34", features = [
+    "wasm-bindgen",
+    "macros",
+    "serde",
+    "serde-well-known",
+] }
 tokio = { version = "1", features = ["rt-multi-thread"], optional = true }
 tower = { version = "0.4", optional = true }
 tower-http = { version = "0.5", features = ["fs"], optional = true }
@@ -38,10 +45,11 @@ ssr = [
     "dep:leptos_axum",
     "dep:sqlx",
     "dep:tracing",
-    "leptonic/ssr",
     "leptos/ssr",
+    "leptonic/ssr",
     "leptos_meta/ssr",
     "leptos_router/ssr",
+
 ]
 
 # Defines a size-optimized profile for the WASM bundle in release mode

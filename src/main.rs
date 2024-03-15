@@ -9,7 +9,7 @@ async fn main() {
     use calendula::calendar::ssr::db;
     let mut conn = db().await.expect("couldn't connect to DB");
     if let Err(e) = sqlx::migrate!().run(&mut conn).await {
-        eprintln!("{e:?}");
+        eprintln!("DB Error: {e:?}");
     }
 
     // Setting get_configuration(None) means we'll be using cargo-leptos's env values
