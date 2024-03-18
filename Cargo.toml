@@ -21,6 +21,7 @@ leptos_meta = { version = "0.6", features = ["nightly"] }
 leptos_router = { version = "0.6", features = ["nightly"] }
 serde = { version = "1.0.197", features = ["derive"] }
 sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "sqlite", "chrono"], optional = true }
+thaw = { version = "0.2.3" }
 thiserror = "1"
 time = { version = "0.3.34", features = [
     "wasm-bindgen",
@@ -36,7 +37,7 @@ wasm-bindgen = "=0.2.92"
 
 [features]
 default = ["ssr", "hydrate"]
-hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate", "leptonic/hydrate"]
+hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate", "leptonic/hydrate", "thaw/hydrate"]
 ssr = [
     "dep:axum",
     "dep:tokio",
@@ -49,7 +50,7 @@ ssr = [
     "leptonic/ssr",
     "leptos_meta/ssr",
     "leptos_router/ssr",
-
+    "thaw/ssr"
 ]
 
 # Defines a size-optimized profile for the WASM bundle in release mode

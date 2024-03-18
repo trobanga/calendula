@@ -1,8 +1,6 @@
-use chrono::{NaiveDate, NaiveTime};
 use getset::{Getters, Setters};
-use leptonic::components::date_selector::DateSelector;
-use time::OffsetDateTime;
 
+use chrono::prelude::*;
 use leptos_router::MultiActionForm;
 use serde::{Deserialize, Serialize};
 
@@ -24,6 +22,7 @@ pub mod ssr {
 #[cfg_attr(feature = "ssr", derive(sqlx::FromRow))]
 #[getset(get = "pub", set = "pub")]
 pub struct CalendarEntry {
+    id: i32,
     title: String,
     start_date: NaiveDate,
     start_time: Option<NaiveTime>,
@@ -35,21 +34,25 @@ pub struct CalendarEntry {
 #[component]
 pub fn Calendar() -> impl IntoView {
     let add_calendar_entry = create_server_multi_action::<AddCalendarEntry>();
-    let entries = create_resource(
+    let entries_resource = create_resource(
         move || add_calendar_entry.version().get(),
         move |_| calendar(),
     );
 
+    logging::log!("Build calendar");
+    let now = Local::now().date_naive().to_string();
+
     // let mut current_date = None;
     view! {
         <div>
-            <DateSelector value=OffsetDateTime::now_utc() on_change=move |v| {
-                // tracing::info!(v);
-            }/>
-
             <MultiActionForm action=add_calendar_entry>
                 <label>
                     "Add a CalendarEntry"
+                    <br/>
+                    <input type="date" name="start_date" value=&now min=&now/>
+                    <input type="time" name="start_time"/>
+                    // <input type="checkbox" name="whole_day"/>
+                    <br/>
                     <input type="text" name="title"/>
                 </label>
                 <input type="submit" value="Add"/>
@@ -57,7 +60,7 @@ pub fn Calendar() -> impl IntoView {
             <Transition fallback=move || view! {<p>"Loading..."</p> }>
                 <ErrorBoundary fallback=|errors| view!{<ErrorTemplate errors=errors/>}>
                     {move || {
-                        entries.get()
+                        entries_resource.get()
                                .map(move |entries| match entries {
                                    Err(e) => {
                                             view! { <pre class="error">"Server Error: " {e.to_string()}</pre>}.into_view()
@@ -66,8 +69,17 @@ pub fn Calendar() -> impl IntoView {
                                        entries.into_iter()
                                               .map(move |entry|
                                                    view! {
-                                                       <p class="text-amber-600">{entry.title()}</p>
-
+                                                       <p class="text-amber-600">{entry.title()}: {entry.start_date().to_string()} - {entry.start_time().map(|t| t.to_string()).unwrap_or_default()}</p>
+                                                       <button on:click=move |_| {
+                                                           let id = *entry.id();
+                                                           logging::log!("click {id}");
+                                                           spawn_local(async move {
+                                                               if delete_calendar_entry(id).await.is_err() {logging::warn!("Cannot delete");};
+                                                               entries_resource.refetch();
+                                                           });
+                                                       }>
+                                                           Delete
+                                                       </button>
                                        }).collect_view()
                                    }
                     }).unwrap_or_default()
@@ -82,22 +94,47 @@ pub fn Calendar() -> impl IntoView {
 #[server(AddCalendarEntry, "/api")]
 async fn add_calendar_entry(
     title: String,
-    // start_date: NaiveDate,
-    // start_time: Option<NaiveTime>,
-    // end_date: Option<NaiveDate>,
-    // end_time: Option<NaiveTime>,
+    start_date: NaiveDate,
+    start_time: Option<NaiveTime>,
+    end_date: Option<NaiveDate>,
+    end_time: Option<NaiveTime>,
 ) -> Result<(), ServerFnError> {
     use crate::calendar::ssr::*;
+    use chrono::Duration;
     let mut conn = db().await?;
 
-    let start_date = chrono::Local::now().date_naive();
-    let start_time: Option<NaiveTime> = None;
-    let end_date: Option<NaiveDate> = None;
-    let end_time: Option<NaiveTime> = None;
-    logging::log!("{}", start_date);
+    let end_datetime = start_time
+        .map(|t| {
+            start_date
+                .and_time(t)
+                .checked_add_signed(Duration::try_hours(1).unwrap())
+        })
+        .flatten();
+
+    let end_date = end_date.unwrap_or(end_datetime.map(|dt| dt.date()).unwrap_or(start_date));
+    let end_time: Option<NaiveTime> = end_time.or(end_datetime.map(|dt| dt.time()));
+
+    logging::log!("{} @ {:?}", start_date, start_time);
 
     match sqlx::query("INSERT INTO calendar_entries (title, start_date, start_time, end_date, end_time) VALUES ($1, $2, $3, $4, $5)")
         .bind(title).bind(start_date).bind(start_time).bind(end_date).bind(end_time)
+        .execute(&mut conn)
+        .await
+    {
+        Ok(_row) => Ok(()),
+        Err(e) => Err(ServerFnError::ServerError(e.to_string())),
+    }
+}
+
+#[server(DeleteCalendarEntry, "/api")]
+async fn delete_calendar_entry(id: i32) -> Result<(), ServerFnError> {
+    use crate::calendar::ssr::*;
+
+    logging::log!("Delete entry {id}");
+
+    let mut conn = db().await?;
+    match sqlx::query("delete from calendar_entries where id = ?")
+        .bind(id)
         .execute(&mut conn)
         .await
     {
