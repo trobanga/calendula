@@ -44,7 +44,7 @@ pub fn Calendar() -> impl IntoView {
 pub fn CalendarEntries(done: ReadSignal<usize>, set_done: WriteSignal<usize>) -> impl IntoView {
     let entries_resource = create_resource(done, move |_| calendar());
     view! {
-        <div class="mx-auto">
+        <div class="mx-auto flex flex-col p-8">
             <Transition fallback=move || view! {<p>"Loading..."</p> }>
                 <ErrorBoundary fallback=|errors| view!{<ErrorTemplate errors=errors/>}>
                     {move || {
@@ -70,7 +70,7 @@ pub fn CalendarEntries(done: ReadSignal<usize>, set_done: WriteSignal<usize>) ->
 pub fn CalendarEntry(entry: CalendarEntry, set_done: WriteSignal<usize>) -> impl IntoView {
     let entry_id = entry.id().clone();
     view! {
-        <div class="">
+        <div class="mx-auto my-2 flex p-2 w-80 rounded-xl shadow-lg bg-slate-200">
             <p class="text-amber-600">
                 {entry.title()}: {entry.start_date().to_string()} - {entry.start_time().map(|t| t.to_string()).unwrap_or_default()}
             </p>
@@ -98,7 +98,7 @@ pub fn NewEntry(set_done: WriteSignal<usize>) -> impl IntoView {
 
     view! {
         <div class="p-6 mx-auto px-8 w-80 space-x-4 rounded-xl shadow-lg flex bg-slate-100">
-            <form class="space-y-4"
+            <form class="space-y-4 mx-auto"
                 on:submit=move |ev| {
                     ev.prevent_default(); // don't reload the page...
                     let title = title_ref.get().expect("title to exist");
@@ -126,8 +126,8 @@ pub fn NewEntry(set_done: WriteSignal<usize>) -> impl IntoView {
                         <input type="time" name="start_time" node_ref=start_time_ref/>
                     </div>
                     <br/>
-                    <div class="mx-auto flex items-end break-before-all">
-                        <button class="mx-auto ring-2 w-12 rounded-xl" type="submit">"Add"</button>
+                    <div class="mx-auto flex">
+                        <button class="mx-auto ring-2 p-2 rounded-xl" type="submit">"Hinzufügen"</button>
                     </div>
             </form>
         </div>
