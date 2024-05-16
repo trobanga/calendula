@@ -2,7 +2,6 @@ use crate::{
     calendar::Calendar,
     error_template::{AppError, ErrorTemplate},
 };
-use leptonic::components::{root::Root, theme::LeptonicTheme};
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
@@ -14,8 +13,7 @@ pub fn App() -> impl IntoView {
 
     view! {
         <Stylesheet id="leptos" href="/pkg/calendula.css"/>
-        <Title text="Welcome to Leptos"/>
-        <Root default_theme=LeptonicTheme::default()>
+        <Title text="Calendula"/>
             <Router fallback=|| {
                 let mut outside_errors = Errors::default();
                 outside_errors.insert_with_default_key(AppError::NotFound);
@@ -30,6 +28,5 @@ pub fn App() -> impl IntoView {
                 </Routes>
             </main>
             </Router>
-        </Root>
     }
 }

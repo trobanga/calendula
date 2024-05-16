@@ -7,37 +7,35 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-axum = { version = "0.7", optional = true, features = ["macros"] }
+axum = { version = "0.7.5", optional = true, features = ["macros"] }
 cfg-if = "1.0.0"
-chrono = { version = "0.4.35", features = ["serde"] }
-console_error_panic_hook = "0.1"
+chrono = { version = "0.4.38", features = ["serde"] }
+console_error_panic_hook = "0.1.7"
 futures = "0.3.30"
 getset = "0.1.2"
-http = "1"
-leptonic = { git = "ssh://git@github.com/lpotthast/leptonic.git", features = ["nightly"] }
-leptos = { version = "0.6", features = ["nightly"] }
-leptos_axum = { version = "0.6", optional = true }
-leptos_meta = { version = "0.6", features = ["nightly"] }
-leptos_router = { version = "0.6", features = ["nightly"] }
-serde = { version = "1.0.197", features = ["derive"] }
-sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "sqlite", "chrono"], optional = true }
-thaw = { version = "0.2.3" }
-thiserror = "1"
-time = { version = "0.3.34", features = [
+http = "1.1.0"
+leptos = { version = "0.6.11", features = ["nightly"] }
+leptos_axum = { version = "0.6.11", optional = true }
+leptos_meta = { version = "0.6.11", features = ["nightly"] }
+leptos_router = { version = "0.6.11", features = ["nightly"] }
+serde = { version = "1.0.199", features = ["derive"] }
+sqlx = { version = "0.7.4", features = ["runtime-tokio-rustls", "sqlite", "chrono"], optional = true }
+thiserror = "1.0.59"
+time = { version = "0.3.36", features = [
     "wasm-bindgen",
     "macros",
     "serde",
     "serde-well-known",
 ] }
-tokio = { version = "1", features = ["rt-multi-thread"], optional = true }
-tower = { version = "0.4", optional = true }
-tower-http = { version = "0.5", features = ["fs"], optional = true }
-tracing = { version = "0.1", optional = true }
-wasm-bindgen = "=0.2.92"
+tokio = { version = "1.37.0", features = ["rt-multi-thread"], optional = true }
+tower = { version = "0.4.13", optional = true }
+tower-http = { version = "0.5.2", features = ["fs"], optional = true }
+tracing = { version = "0.1.40", optional = true }
+wasm-bindgen = "0.2.92"
 
 [features]
 default = ["ssr", "hydrate"]
-hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate", "leptonic/hydrate", "thaw/hydrate"]
+hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
 ssr = [
     "dep:axum",
     "dep:tokio",
@@ -47,10 +45,8 @@ ssr = [
     "dep:sqlx",
     "dep:tracing",
     "leptos/ssr",
-    "leptonic/ssr",
     "leptos_meta/ssr",
     "leptos_router/ssr",
-    "thaw/ssr"
 ]
 
 # Defines a size-optimized profile for the WASM bundle in release mode
@@ -81,7 +77,7 @@ style-file = "style/output.css"
 assets-dir = "public"
 
 # The IP and port (ex: 127.0.0.1:3000) where the server serves the content. Use it in your server setup.
-site-addr = "127.0.0.1:3000"
+site-addr = "0.0.0.0:3000"
 
 # The port to use for automatic reload monitoring
 reload-port = 3001

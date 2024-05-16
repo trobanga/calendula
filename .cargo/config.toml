@@ -1,3 +1,9 @@
 [build]
 # `leptonic` depends on some `leptos-use` functions requiring this opt-in. This may change in the future.
 rustflags = ["--cfg=web_sys_unstable_apis"]
+
+[target.armv7-unknown-linux-gnueabihf]
+linker = "arm-none-linux-gnueabihf-gcc"
+
+[target.aarch64-unknown-linux-gnu]
+linker = "aarch64-rpi4-linux-gnu-gcc"
